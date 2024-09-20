@@ -1560,14 +1560,23 @@ int main(int argc, char *argv[])
             mcu_mk1 = true;
             mcu_cm300 = true;
             break;
-        case ROM_SET_JV880:
+        case ROM_SET_JV880: {
             mcu_jv880 = true;
             rom2_mask /= 2; // rom is half the size
             lcd_width = 820;
             lcd_height = 100;
             lcd_col1 = 0x000000;
             lcd_col2 = 0x78b500;
+
+            // NVRAM code
+            FILE* f = fopen("nvram.bin", "rb");
+            if (f)
+            {
+                fread(nvram, NVRAM_SIZE, 1, f);
+                fclose(f);
+            }
             break;
+        }
         case ROM_SET_SCB55:
         case ROM_SET_RLP3237:
             mcu_scb55 = true;
@@ -1770,6 +1779,13 @@ int main(int argc, char *argv[])
     MIDI_Quit();
     LCD_UnInit();
     SDL_Quit();
+
+    // NVRAM code
+    if (romset == ROM_SET_JV880) {
+        FILE* f = fopen("nvram.bin", "wb");
+        fwrite(nvram, NVRAM_SIZE, 1, f);
+        fclose(f);
+    }
 
     return 0;
 }
